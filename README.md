@@ -14,13 +14,13 @@ I hold a Master of City Planning and a Certificate in Real Estate Design & Devel
 
 | Year | Conference or host | Presentation |
 | --- | --- | --- |
-| 2026 | [New York Association of Towns Annual Meeting & Training School](https://www.nytowns.org/common/Uploaded%20files/2026%20Digital%20Program.pdf)<br>New York City | The Economic Power of Parks: A Case Study from Schenectady<br>*Co-presenter* |
-| 2026 | [Saratoga County Planning & Zoning Conference](https://www.saratogacountyny.gov/departments/planning/annual-planning-zoning-conference/course-descriptions/)<br>Saratoga Springs | Parks and trails in the planning and zoning approval process<br>*Panelist* |
+| 2026 | [New York Association of Towns Annual Meeting & Training School](https://www.nytowns.org/common/Uploaded%20files/2026%20Digital%20Program.pdf)<br>New York City | The Economic Power of Parks: A Case Study from Schenectady |
+| 2026 | [Saratoga County Planning & Zoning Conference](https://www.saratogacountyny.gov/departments/planning/annual-planning-zoning-conference/course-descriptions/)<br>Saratoga Springs | Parks and trails in the planning and zoning approval process |
 | 2025 | [Tupper Lake Central School District Board of Education](https://www.adirondackdailyenterprise.com/news/local-news/2025/11/study-tl-civic-center-draws-5x-economic-value-than-it-costs/) | Economic impact of the Tupper Lake Memorial Civic Center |
-| 2025 | [APA New York Upstate Annual Conference](https://static1.squarespace.com/static/5717ac15a3360cf4481e28bc/t/68dd1c8a99c97f2845ae1840/1759321226932/APA%2B2025%2BProgram%2BFINAL.pdf)<br>Rochester | Pedal Power and Park Value — parks economics and bike-share planning<br>*Co-presenter* |
-| 2024 | Capital Region Parks and Recreation Association Annual Meeting | Recreation Grants: What You Need to Know<br>*Invited speaker* |
+| 2025 | [APA New York Upstate Annual Conference](https://static1.squarespace.com/static/5717ac15a3360cf4481e28bc/t/68dd1c8a99c97f2845ae1840/1759321226932/APA%2B2025%2BProgram%2BFINAL.pdf)<br>Rochester | Pedal Power and Park Value — parks economics and bike-share planning |
+| 2024 | Capital Region Parks and Recreation Association Annual Meeting | Recreation Grants: What You Need to Know |
 | 2024 | [World Town Planning Day](https://www.planning.org/passport/passportcourse/9303630/)<br>International webinar | Pro-Housing Communities in Rural America |
-| 2024 | [APA New York Upstate Annual Conference](https://static1.squarespace.com/static/5717ac15a3360cf4481e28bc/t/66feda419928f72fa432a28d/1727978054329/UpstateNYPlanningAssoc-PROGRAM-20241001-spreads.pdf)<br>Ithaca | Grant funding for sustainable and resilient communities<br>*Co-presenter* |
+| 2024 | [APA New York Upstate Annual Conference](https://static1.squarespace.com/static/5717ac15a3360cf4481e28bc/t/66feda419928f72fa432a28d/1727978054329/UpstateNYPlanningAssoc-PROGRAM-20241001-spreads.pdf)<br>Ithaca | Grant funding for sustainable and resilient communities |
 
 ## Selected public work
 
