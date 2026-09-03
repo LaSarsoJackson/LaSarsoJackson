@@ -10,7 +10,7 @@ My work focuses on economic development and the land-use, zoning, and funding de
 
 I hold a Master of City Planning and a Certificate in Real Estate Design & Development from the University of Pennsylvania, along with a BA in Urban Planning from UAlbany. I previously served on Queensbury's Planning Board and as an alternate on its Zoning Board of Appeals.
 
-## Speaking & presentations
+## Presentations
 
 | Year | Conference or host | Presentation |
 | --- | --- | --- |
