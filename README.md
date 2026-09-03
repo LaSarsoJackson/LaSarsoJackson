@@ -18,14 +18,6 @@ The project brings together GIS, historic information, and a web interface for p
 
 [Open the application](https://lasarsojackson.github.io/fab/) · [Explore the repository](https://github.com/LaSarsoJackson/fab)
 
-### [Philadelphia RCO data reports](https://github.com/nlebovits/rcos_data)
-
-**Collaborative contribution · 2023**
-
-I contributed monthly and weekly Philadelphia eviction-data imports to a shared R project for neighborhood data reporting.
-
-[Explore the project](https://github.com/nlebovits/rcos_data) · [View my merged contribution](https://github.com/nlebovits/rcos_data/pull/2)
-
 ---
 
 [Professional background](https://www.saratogaassociates.com/about/team/) · [Public repositories](https://github.com/LaSarsoJackson?tab=repositories&type=public)
