@@ -4,9 +4,11 @@
 
 **Economic development & real estate planning**
 
-I'm a community planner at [Saratoga Associates](https://www.saratogaassociates.com/about/team/). My focus is economic development and the land-use, zoning, and funding decisions that shape real estate development. I work with municipalities, nonprofits, and private clients on planning policy, environmental review, and GIS analysis.
+I'm a community planner at [Saratoga Associates](https://www.saratogaassociates.com/about/team/) and an adjunct professor at the [University at Albany](https://www.albany.edu/), where I teach environmental planning.
 
-At Penn, I earned a Master of City Planning and a Certificate in Real Estate Design & Development. This GitHub brings together public planning work and tools for exploring places and local data.
+My work focuses on economic development and the land-use, zoning, and funding decisions that shape real estate development. I advise municipalities, nonprofits, and private clients on planning policy, environmental review, and GIS analysis.
+
+I hold a Master of City Planning and a Certificate in Real Estate Design & Development from Penn, along with a BA in Urban Planning from UAlbany. I previously served on Queensbury's Planning Board and as an alternate on its Zoning Board of Appeals.
 
 ## Selected public work
 
