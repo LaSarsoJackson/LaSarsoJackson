@@ -4,7 +4,7 @@
 
 **Economic development & real estate planning**
 
-I'm a community planner at [Saratoga Associates](https://www.saratogaassociates.com/about/team/) and an adjunct professor at the [University at Albany](https://www.albany.edu/), where I teach environmental planning.
+I'm a community planner at [Saratoga Associates](https://www.saratogaassociates.com/about/team/) and an adjunct professor at the [University at Albany](https://www.albany.edu/). My teaching has included environmental planning and project management.
 
 My work focuses on economic development and the land-use, zoning, and funding decisions that shape real estate development. I advise municipalities, nonprofits, and private clients on planning policy, environmental review, and GIS analysis.
 
