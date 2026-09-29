@@ -38,7 +38,6 @@ A team proposal to reconnect Camden neighborhoods and reclaim highway land for d
 
 A public map and burial search tool that connects historic records to places within Albany Rural Cemetery. Visitors can search burial records, locate graves, and explore curated tours.
 
-The project brings together GIS, historic information, and a web interface for public use.
 
 [Open the application](https://lasarsojackson.github.io/fab/) · [Explore the repository](https://github.com/LaSarsoJackson/fab)
 
