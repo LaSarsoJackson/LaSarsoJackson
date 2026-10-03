@@ -36,10 +36,9 @@ A team proposal to reconnect Camden neighborhoods and reclaim highway land for d
 
 ### [Albany Rural Cemetery: Grave Finder](https://github.com/LaSarsoJackson/fab)
 
-A public map and burial search tool that connects historic records to places within Albany Rural Cemetery. Visitors can search burial records, locate graves, and explore curated tours.
+A public map and burial search tool that connects historic records to places within Albany Rural Cemetery. Visitors can search burial records, locate graves, and explore curated tours. I develop and maintain it as part of the University at Albany's Albany Rural Cemetery Explorer collaboration.
 
-
-[Open the application](https://lasarsojackson.github.io/fab/) · [Explore the repository](https://github.com/LaSarsoJackson/fab)
+[Open the application](https://lasarsojackson.github.io/fab/) · [App Store](https://apps.apple.com/us/app/albany-grave-finder/id6746413050) · [Explore the repository](https://github.com/LaSarsoJackson/fab)
 
 ---
 
