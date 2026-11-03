@@ -1,41 +1,42 @@
 name: Agent CI
-
-on:
-  pull_request:
+'on':
+  pull_request: null
   push:
-    branches: [main]
-  workflow_dispatch:
-
+    branches:
+    - main
+  workflow_dispatch: null
 permissions:
   contents: read
-
 concurrency:
   group: agent-ci-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   local-contract:
     name: Local validation
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
-        with:
-          fetch-depth: 2
-          persist-credentials: false
-      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
-        with:
-          python-version: '3.12'
-      - name: Install YAML parser
-        run: python -m pip install PyYAML==6.0.3
-      - name: Validate changed sources
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        shell: bash
-        run: |
-          if [ -n "$BASE_SHA" ] && ! [[ "$BASE_SHA" =~ ^0+$ ]]; then
-            git cat-file -e "$BASE_SHA" || git fetch --no-tags --depth=1 origin "$BASE_SHA"
-            python .github/agent-ci.py check --syntax-only --base "$BASE_SHA"
-          else
-            python .github/agent-ci.py check --syntax-only --base HEAD~1
-          fi
+    - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      with:
+        fetch-depth: 2
+        persist-credentials: false
+        sparse-checkout: /.github/
+        sparse-checkout-cone-mode: false
+    - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
+      with:
+        python-version: '3.12'
+    - name: Install YAML parser
+      run: python -m pip install PyYAML==6.0.3
+    - name: Validate changed sources
+      env:
+        BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        GH_TOKEN: ${{ github.token }}
+      shell: bash
+      run: |
+        if [ -n "$BASE_SHA" ] && ! [[ "$BASE_SHA" =~ ^0+$ ]]; then
+          git cat-file -e "$BASE_SHA" || git -c credential.helper= -c "credential.helper=!gh auth git-credential" fetch --no-tags --depth=1 origin "$BASE_SHA"
+        else
+          BASE_SHA=HEAD~1
+        fi
+        python .github/agent-ci.py hydrate --base "$BASE_SHA"
+        python .github/agent-ci.py check --syntax-only --base "$BASE_SHA"
