@@ -249,7 +249,11 @@ def hydrate(args):
             raise RuntimeError("Sparse CI hydration cannot represent a filename containing a newline.")
         escaped = "".join("\\" + char if char in "\\*?[]!# " else char for char in path)
         patterns.append("/" + escaped)
-    command(["git", "sparse-checkout", "set", "--no-cone", "--stdin"], stdin="\n".join(patterns) + "\n")
+    argv = ["git"]
+    if os.environ.get("GITHUB_ACTIONS") == "true" and os.environ.get("GH_TOKEN"):
+        # Scope private lazy-blob authentication to this Git invocation.
+        argv += ["-c", "credential.helper=", "-c", "credential.helper=!gh auth git-credential"]
+    command(argv + ["sparse-checkout", "set", "--no-cone", "--stdin"], stdin="\n".join(patterns) + "\n")
 
 
 def ship(args):
