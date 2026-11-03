@@ -154,7 +154,8 @@ def protected_state():
     patterns = [".github/*", ".githooks/*", "*test*", "*spec*", "*lock*",
                 "*eslint*", "*tsconfig*", "*vitest*", "*playwright*", "package.json",
                 "*/package.json", "*pyproject.toml", "*requirements*.txt", "*.csproj",
-                "scripts/*", "checks/*", "*lint*", "*config.*"]
+                "scripts/*", "checks/*", "*lint*", "*config.*", "config/*",
+                "examples/*", "docs/evidence/*"]
     patterns += policy().get("protectedPaths", [])
     for task in policy().get("tasks", []):
         patterns += [item for item in task["argv"] if Path(item).is_file()]
@@ -199,10 +200,18 @@ def repair(args):
 
 
 def install(_args):
-    current = subprocess.run(["git", "config", "--local", "--get", "core.hooksPath"],
-                             text=True, capture_output=True).stdout.strip()
-    if current and current != ".githooks":
+    local = subprocess.run(["git", "config", "--local", "--get", "core.hooksPath"], text=True, capture_output=True)
+    effective = subprocess.run(["git", "config", "--get", "core.hooksPath"], text=True, capture_output=True)
+    current = local.stdout.strip()
+    if effective.returncode == 0 and (local.returncode != 0 or effective.stdout.strip() != current):
+        raise RuntimeError("An inherited hooksPath is active; integrate those hooks before installation.")
+    if local.returncode == 0 and current != ".githooks":
         raise RuntimeError(f"Existing hooksPath is {current}; integrate its hooks before installation.")
+    if current:
+        for scope in ("--global", "--system"):
+            inherited = subprocess.run(["git", "config", scope, "--get", "core.hooksPath"], text=True, capture_output=True)
+            if inherited.returncode == 0:
+                raise RuntimeError(f"An inherited {scope} hooksPath needs integration before migrating the local hook.")
     source = Path(".githooks/pre-push")
     mistaken_backup = source.with_name("pre-push.agent-ci-original")
     marker = "# agent-ci-native-hook-v1"
