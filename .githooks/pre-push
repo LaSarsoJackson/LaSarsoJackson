@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+if command -v python3 >/dev/null 2>&1; then python=python3; else python=python; fi
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$local_sha" in 0000000000000000000000000000000000000000) continue ;; esac
+  "$python" .github/agent-ci.py check --base "$remote_sha" --head "$local_sha" --committed
+done
