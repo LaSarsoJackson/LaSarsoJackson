@@ -43,12 +43,20 @@ def command(argv, *, capture=False, timeout=300, stdin=None, trim=True):
     return (stdout.strip() if trim else stdout) if capture else ""
 
 
+def git_argv(*args):
+    argv = ["git"]
+    if os.environ.get("GITHUB_ACTIONS") == "true" and os.environ.get("GH_TOKEN"):
+        # Status and ignore discovery can also fetch missing private blobs.
+        argv += ["-c", "credential.helper=", "-c", "credential.helper=!gh auth git-credential"]
+    return argv + list(args)
+
+
 def git(*args):
-    return command(["git", *args], capture=True)
+    return command(git_argv(*args), capture=True)
 
 
 def paths_output(*args):
-    return [p for p in command(["git", *args], capture=True, trim=False).split("\0") if p]
+    return [p for p in command(git_argv(*args), capture=True, trim=False).split("\0") if p]
 
 
 def changed(args):
@@ -249,11 +257,7 @@ def hydrate(args):
             raise RuntimeError("Sparse CI hydration cannot represent a filename containing a newline.")
         escaped = "".join("\\" + char if char in "\\*?[]!# " else char for char in path)
         patterns.append("/" + escaped)
-    argv = ["git"]
-    if os.environ.get("GITHUB_ACTIONS") == "true" and os.environ.get("GH_TOKEN"):
-        # Scope private lazy-blob authentication to this Git invocation.
-        argv += ["-c", "credential.helper=", "-c", "credential.helper=!gh auth git-credential"]
-    command(argv + ["sparse-checkout", "set", "--no-cone", "--stdin"], stdin="\n".join(patterns) + "\n")
+    command(git_argv("sparse-checkout", "set", "--no-cone", "--stdin"), stdin="\n".join(patterns) + "\n")
 
 
 def ship(args):
