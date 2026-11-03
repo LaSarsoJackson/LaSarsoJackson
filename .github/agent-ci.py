@@ -203,13 +203,34 @@ def install(_args):
                              text=True, capture_output=True).stdout.strip()
     if current and current != ".githooks":
         raise RuntimeError(f"Existing hooksPath is {current}; integrate its hooks before installation.")
+    source = Path(".githooks/pre-push")
+    mistaken_backup = source.with_name("pre-push.agent-ci-original")
+    marker = "# agent-ci-native-hook-v1"
+    if source.exists() and marker in source.read_text(encoding="utf-8", errors="replace"):
+        expected = command(git_argv("show", "HEAD:.githooks/pre-push"), capture=True, trim=False).encode("utf-8")
+        if not mistaken_backup.exists() or mistaken_backup.read_bytes().replace(b"\r\n", b"\n") != expected.replace(b"\r\n", b"\n"):
+            raise RuntimeError("Preserve the modified source hook before repairing the earlier installation.")
+        source.write_bytes(expected)
+        mistaken_backup.unlink()
+    if not source.exists():
+        sparse = subprocess.run(["git", "config", "--get", "core.sparseCheckout"], text=True,
+                                capture_output=True).stdout.strip()
+        if sparse != "true":
+            raise RuntimeError("Restore the tracked .githooks/pre-push source before installing.")
+        cone = subprocess.run(["git", "config", "--get", "core.sparseCheckoutCone"], text=True,
+                              capture_output=True).stdout.strip()
+        pattern = ".githooks" if cone == "true" else "/.githooks/"
+        command(git_argv("sparse-checkout", "add", "--stdin"), stdin=pattern + "\n")
+        if not source.exists():
+            raise RuntimeError("The sparse checkout does not contain the tracked pre-push source.")
     if current:
         extra = [p for p in Path(current).iterdir() if p.is_file() and p.name != "pre-push"]
         if extra:
             raise RuntimeError(f"Preserve the additional hooks in {current} before changing installation: {extra}")
-    hook = Path(git("rev-parse", "--git-path", "hooks/pre-push"))
+    # --git-path hooks is affected by core.hooksPath; the common Git directory is not.
+    common = Path(git("rev-parse", "--path-format=absolute", "--git-common-dir"))
+    hook = common / "hooks/pre-push"
     backup = hook.with_name("pre-push.agent-ci-original")
-    marker = "# agent-ci-native-hook-v1"
     if hook.is_symlink() or backup.is_symlink():
         raise RuntimeError("Integrate symbolic-link hooks explicitly before installation.")
     hook.parent.mkdir(parents=True, exist_ok=True)
@@ -225,7 +246,8 @@ refs=$(cat)
 pass_refs() { if [ -n "$refs" ]; then printf '%s\\n' "$refs"; fi; }
 root=$(git rev-parse --show-toplevel)
 pass_refs | "$root/.githooks/pre-push" "$@"
-original=$(git rev-parse --git-path hooks/pre-push.agent-ci-original)
+common=$(git rev-parse --path-format=absolute --git-common-dir)
+original="$common/hooks/pre-push.agent-ci-original"
 if [ -f "$original" ]; then pass_refs | "$original" "$@"; fi
 '''
     temporary = hook.with_name("pre-push.agent-ci-new")
