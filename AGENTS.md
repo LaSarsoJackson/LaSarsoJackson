@@ -8,17 +8,22 @@ This README appears on the public GitHub profile. Preserve credentials, dates, t
 
 ## Local validation and automated delivery
 
-Run `python .github/agent-ci.py check` before committing, and fix reported errors
-in the current workspace. Use `check --full` when the affected behavior needs the
-declared regression checks. Run `python .github/agent-ci.py install` once per
-checkout to enable the pre-push hook. Existing hooks must be integrated first.
-After committing a focused branch, use `python .github/agent-ci.py ship` to push,
-open its pull request, and enable auto-merge for that exact commit. Required CI
-checks decide the merge; Jackson does not need to approve routine code changes.
-Do not bypass failed checks or replace assertions to obtain a passing result.
-`repair --agent '<JSON argument array>'` permits two local repair attempts with
-five minutes per attempt and stops if tests or validation policy change.
-`rollback --commit <sha>` creates a revert through the same checked path.
-Deployment changes do not authorize live business-record writes or native store
-submissions. The maintained controller and usage are in
+Run `python .github/agent-ci.py check` while editing. The pre-push hook keeps
+syntax, lint and compile feedback fast. After committing a focused branch, run
+`python .github/agent-ci.py ship`. It runs the declared regression tasks affected
+by the diff locally before pushing, opens the PR and requests auto-merge.
+Use `check --full` for every declared task. Fix failures locally before delivery.
+Install the hook once per checkout with `python .github/agent-ci.py install`.
+Preserve existing hooks and use the owning application's required checks when
+its workflow is broader than the shared task configuration.
+
+Routine verification workflows are manual diagnostics in Actions. Hosted builds,
+deployments and health checks keep their own release requirements. GrandTrack
+also retains its main-branch CI because deployments and backups depend on it.
+Local results are trusted; GitHub does not attest that a direct push ran tests.
+Do not replace assertions to obtain a passing result. Routine changes require
+no human PR approval. `repair --agent '<JSON argument array>'` permits two local
+repair attempts, each limited to five minutes. `rollback --commit <sha>` creates
+a checked revert. Deployment changes do not authorize business-record writes or
+native store submissions. The maintained controller is in
 `LaSarsoJackson/preference-backup/system-tools/agent-ci/`.
