@@ -19,9 +19,9 @@ import sys
 import time
 
 
-def command(argv, *, capture=False, timeout=300, stdin=None, trim=True):
+def command(argv, *, capture=False, timeout=300, stdin=None, trim=True, cwd=None):
     # No shell interpolation, including changed filenames and agent arguments.
-    process = subprocess.Popen(argv, text=True, encoding="utf-8", errors="replace",
+    process = subprocess.Popen(argv, cwd=cwd, text=True, encoding="utf-8", errors="replace",
                                stdin=subprocess.PIPE if stdin is not None else None,
                                stdout=subprocess.PIPE if capture else None,
                                stderr=subprocess.PIPE if capture else None,
@@ -125,8 +125,9 @@ def check(args):
         except Exception as error:
             # YAML parser errors must produce a failed gate, never a skipped file.
             errors.append(f"{filename}: {error}")
+    executed = set()
     for task in ([] if args.syntax_only else settings.get("tasks", [])):
-        if task.get("full", False) and not args.full:
+        if task.get("full", False) and not (args.full or getattr(args, "delivery", False)):
             continue
         selected = [p for p in files if matches(p, task.get("paths", ["*"]))]
         if not selected and not args.full:
@@ -136,9 +137,13 @@ def check(args):
             argv.extend([p for p in selected if Path(p).is_file()] if item == "{files}" else [item])
         if not any(Path(p).is_file() for p in selected) and "{files}" in task["argv"]:
             continue
+        identity = (tuple(argv), task.get("cwd"))
+        if identity in executed:
+            continue
+        executed.add(identity)
         print(f"Run {task['name']}", flush=True)
         try:
-            command(argv, timeout=task.get("timeoutSeconds", 300))
+            command(argv, timeout=task.get("timeoutSeconds", 300), cwd=task.get("cwd"))
         except (RuntimeError, OSError, subprocess.TimeoutExpired) as error:
             errors.append(f"{task['name']}: {error}")
     elapsed = round(time.monotonic() - started, 3)
@@ -288,7 +293,10 @@ def hydrate(args):
 
 
 def ship(args):
+    if args.syntax_only:
+        raise RuntimeError("Delivery requires native local checks; --syntax-only is for diagnostics.")
     with writer_lock():
+        args.delivery = True
         args.committed = True
         args.head = "HEAD"
         check(args)
