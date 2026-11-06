@@ -12,11 +12,17 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import signal
 import subprocess
 import sys
 import time
+
+try:
+    import yaml
+except ImportError:
+    yaml = None
 
 
 def command(argv, *, capture=False, timeout=300, stdin=None, trim=True, cwd=None):
@@ -94,11 +100,102 @@ def policy():
     return json.loads(path.read_text(encoding="utf-8-sig")) if path.exists() else {"tasks": []}
 
 
+def action_pin_result():
+    candidates = {}
+    for entry in paths_output("ls-files", "-t", "-z", "--cached"):
+        candidates[entry[2:]] = entry.startswith("S ")
+    for filename in paths_output("ls-files", "--others", "--exclude-standard", "-z"):
+        candidates[filename] = False
+    candidates = {name: sparse for name, sparse in candidates.items()
+                  if (name.startswith(".github/workflows/") and len(Path(name).parts) == 3
+                      and Path(name).suffix in (".yml", ".yaml"))
+                  or Path(name).name in ("action.yml", "action.yaml")}
+    result = {"files": 0, "references": 0, "errors": []}
+    if not candidates:
+        return result
+    if yaml is None:
+        raise RuntimeError("Action pin checks require: python -m pip install PyYAML==6.0.3")
+
+    class UniqueKeysLoader(yaml.SafeLoader):
+        def construct_mapping(self, node, deep=False):
+            self.flatten_mapping(node)
+            seen = set()
+            for key_node, _ in node.value:
+                key = self.construct_object(key_node, deep=deep)
+                if key in seen:
+                    raise ValueError(f"Duplicate YAML key: {key}")
+                seen.add(key)
+            return super().construct_mapping(node, deep=deep)
+
+    def reference(value, location):
+        result["references"] += 1
+        if isinstance(value, str):
+            if value.startswith("./"):
+                return
+            if re.fullmatch(r"[^@\s]+/[^@\s]+(?:/[^@\s]+)*@[0-9a-fA-F]{40}", value):
+                return
+            if re.fullmatch(r"docker://[^@\s]+@sha256:[0-9a-fA-F]{64}", value):
+                return
+        result["errors"].append(f"{location}: uses must be a full 40-character commit SHA, "
+                                "a Docker sha256 digest, or a same-repository ./ path")
+
+    def steps(value, location):
+        if not isinstance(value, list):
+            raise ValueError(f"{location} must be a list")
+        for index, step in enumerate(value):
+            if not isinstance(step, dict):
+                raise ValueError(f"{location}[{index}] must be a mapping")
+            if "uses" in step:
+                reference(step["uses"], f"{location}[{index}].uses")
+
+    for filename, sparse in sorted(candidates.items()):
+        path = Path(filename)
+        try:
+            if path.is_symlink():
+                raise ValueError("Workflow and action files must not be symlinks")
+            if path.is_file():
+                text = path.read_text(encoding="utf-8-sig")
+            elif sparse:
+                text = command(git_argv("show", ":" + filename), capture=True, trim=False)
+            else:
+                continue
+            result["files"] += 1
+            document = yaml.load(text, Loader=UniqueKeysLoader)
+            if not isinstance(document, dict):
+                raise ValueError("Workflow and action files must contain a mapping")
+            if filename.startswith(".github/workflows/"):
+                jobs = document.get("jobs", {})
+                if not isinstance(jobs, dict):
+                    raise ValueError("jobs must be a mapping")
+                for name, job in jobs.items():
+                    if not isinstance(job, dict):
+                        raise ValueError(f"jobs.{name} must be a mapping")
+                    location = f"{filename}:jobs.{name}"
+                    if "uses" in job:
+                        reference(job["uses"], location + ".uses")
+                    if "steps" in job:
+                        steps(job["steps"], location + ".steps")
+            else:
+                runs = document.get("runs", {})
+                if isinstance(runs, dict) and "steps" in runs:
+                    steps(runs["steps"], filename + ":runs.steps")
+        except (ValueError, TypeError, OSError, yaml.YAMLError) as error:
+            result["errors"].append(f"{filename}: {error}")
+    return result
+
+
+def action_pins(args):
+    result = action_pin_result()
+    print(json.dumps(result, indent=2), flush=True)
+    if result["errors"]:
+        raise RuntimeError("Action pin validation failed.")
+
+
 def check(args):
     started = time.monotonic()
     files = changed(args)
     settings = policy()
-    errors = []
+    errors = action_pin_result()["errors"]
     for filename in files:
         path = Path(filename)
         if not path.is_file():
@@ -111,10 +208,8 @@ def check(args):
             elif suffix == ".json":
                 json.loads(path.read_text(encoding="utf-8-sig"))
             elif suffix in (".yml", ".yaml"):
-                try:
-                    import yaml
-                except ImportError as error:
-                    raise RuntimeError("YAML checks require: python -m pip install PyYAML==6.0.3") from error
+                if yaml is None:
+                    raise RuntimeError("YAML checks require: python -m pip install PyYAML==6.0.3")
                 yaml.safe_load(path.read_text(encoding="utf-8-sig"))
             elif suffix in (".mjs", ".cjs", ".js"):
                 command(["node", "--check", filename], capture=True, timeout=30)
@@ -328,7 +423,7 @@ def rollback(args):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("mode", choices=["check", "repair", "install", "ship", "rollback", "affected", "hydrate"])
+    parser.add_argument("mode", choices=["check", "repair", "install", "ship", "rollback", "affected", "hydrate", "action-pins"])
     parser.add_argument("--base", help="Previously validated remote commit or comparison base")
     parser.add_argument("--head", default="HEAD")
     parser.add_argument("--committed", action="store_true", help="Require exact clean HEAD for a push")
@@ -345,7 +440,8 @@ def main():
     if args.mode == "rollback" and not args.commit:
         parser.error("rollback requires --commit")
     {"check": check, "repair": repair, "install": install,
-     "ship": ship, "rollback": rollback, "affected": affected, "hydrate": hydrate}[args.mode](args)
+     "ship": ship, "rollback": rollback, "affected": affected, "hydrate": hydrate,
+     "action-pins": action_pins}[args.mode](args)
 
 
 if __name__ == "__main__":
